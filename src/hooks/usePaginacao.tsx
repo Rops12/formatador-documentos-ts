@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, ReactElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Questao } from '../types';
 
-// Constantes movidas para o topo do arquivo para estarem sempre acessíveis
+// Constantes movidas para o topo do arquivo
 const PAGE_HEIGHT_PX = 1122.8; 
 const PAGE_PADDING_Y_PX = 56.7;
 const MARGEM_ENTRE_QUESTOES_PX = 16;
@@ -74,7 +74,7 @@ export const usePaginacao = (
   const MedidorDeAltura = (
     <div style={{ position: 'absolute', visibility: 'hidden', zIndex: -1, width: '18cm' }}>
       {questoes.map(q => (
-        <div key={q.id} ref={el => (refs.current[q.id] = el)}>
+        <div key={q.id} ref={el => { refs.current[q.id] = el; }}>
           <div className="prose prose-sm max-w-none">
             <div className="mb-4 questao-preview-item">
               <div className="font-semibold text-gray-900">Questão {q.numero}</div>

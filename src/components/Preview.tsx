@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-// import logoColegio from '../assets/logo.svg'; // Se tiver o logo, descomente
+// import logoColegio from '../assets/logo.svg';
 import { FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 import { Questao } from '../types';
-import { usePaginacao } from '../hooks/usePaginacao'; // Importação corrigida
+import { usePaginacao } from '../hooks/usePaginacao';
 import { usePageScale } from '../hooks/usePageScale';
 
 interface PreviewProps {
@@ -52,7 +52,7 @@ const Rodape = React.forwardRef<HTMLElement, RodapeProps>(
 const PaginaComponent: React.FC<PaginaComponentProps> = ({ questoes, template, disciplina, serie, turma, paginaInfo }) => {
     const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);
     return (
-      <div className="page flex flex-col">
+      <div className="page flex flex-col bg-white shadow-lg p-[1.5cm] box-border text-[10pt]">
         {paginaInfo.numero === 1 && <Cabecalho template={template} disciplina={disciplina} serie={serie} turma={turma} />}
         <main className={`flex-grow overflow-hidden ${usarDuasColunas ? 'page-content-duas-colunas' : ''}`}>
           {questoes.map(questao => (
@@ -75,7 +75,7 @@ const PaginaComponent: React.FC<PaginaComponentProps> = ({ questoes, template, d
 };
 
 const EmptyState: React.FC = () => (
-  <div className="page flex items-center justify-center text-center text-gray-500">
+  <div className="page flex items-center justify-center text-center text-gray-500 bg-white shadow-lg">
     <div>
       <FiFileText className="mx-auto text-5xl text-gray-400 mb-4" />
       <h3 className="font-semibold text-gray-700">Pré-visualização do Documento</h3>
@@ -108,19 +108,13 @@ function Preview({ questoes, template, disciplina, serie, turma, isPrinting = fa
         onClick={() => setPaginaVisivel(p => Math.max(0, p - 1))} 
         disabled={paginaVisivel === 0}
         className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        <FiChevronLeft size={20} />
-      </button>
-      <span className="font-semibold text-gray-700 text-sm">
-        Página {paginaVisivel + 1} de {paginas.length || 1}
-      </span>
+      ><FiChevronLeft size={20} /></button>
+      <span className="font-semibold text-gray-700 text-sm">Página {paginaVisivel + 1} de {paginas.length || 1}</span>
       <button 
         onClick={() => setPaginaVisivel(p => Math.min(paginas.length - 1, p + 1))} 
         disabled={!paginas.length || paginaVisivel >= paginas.length - 1}
         className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        <FiChevronRight size={20} />
-      </button>
+      ><FiChevronRight size={20} /></button>
     </div>
   );
   
@@ -153,9 +147,9 @@ function Preview({ questoes, template, disciplina, serie, turma, isPrinting = fa
         {MedidorDeAltura}
       </div>
 
-      <div className="preview-container" ref={pageContainerRef}>
+      <div className="preview-container flex justify-center items-center p-4 sm:p-8 bg-gray-200 rounded-lg overflow-hidden" ref={pageContainerRef}>
         <div 
-          className="page-wrapper" 
+          className="page-wrapper w-[21cm] h-[29.7cm] flex-shrink-0" 
           ref={pageWrapperRef} 
           style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
         >
