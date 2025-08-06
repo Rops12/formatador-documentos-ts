@@ -146,7 +146,7 @@ function App() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col h-fit">
             <div className="p-6 lg:p-8">
               <header className="mb-8">
-                  <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3"><FiFileText className="text-blue-600" />Construtor de Avaliações</h1>
+                  <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3"><FiFileText className="text-blue-600" />Mecanografia Salesiano Aracaju</h1>
                   <p className="text-gray-500 mt-2">Adicione, edite e reordene as suas questões de forma modular.</p>
               </header>
 

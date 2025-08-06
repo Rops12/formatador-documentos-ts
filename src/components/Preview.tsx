@@ -1,45 +1,59 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+// import logoColegio from '../assets/logo.svg'; // Se tiver o logo, descomente
 import { FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 import { Questao } from '../types';
-import { usePaginacao } from '../hooks/usePaginacao';
+import { usePaginacao } from '../hooks/usePaginacao'; // Importação corrigida
 import { usePageScale } from '../hooks/usePageScale';
 
-// 1. Tipagem das props do Preview
 interface PreviewProps {
   questoes: Questao[];
   template: string;
   disciplina: string;
   serie: string;
   turma: string;
-  isPrinting?: boolean; // Opcional, para a geração do PDF
+  isPrinting?: boolean;
 }
 
-// -- Componentes Internos --
+type CabecalhoProps = Omit<PreviewProps, 'questoes' | 'isPrinting'>;
+type RodapeProps = { paginaAtual: number; totalPaginas: number };
+type PaginaComponentProps = {
+    questoes: Questao[];
+    paginaInfo: { numero: number; total: number };
+} & CabecalhoProps;
 
-const Cabecalho = React.forwardRef<HTMLElement, Omit<PreviewProps, 'questoes'>>(({ template, disciplina, serie, turma }, ref) => (
+const Cabecalho = React.forwardRef<HTMLElement, CabecalhoProps>(
+  ({ template, disciplina, serie, turma }, ref) => (
     <header ref={ref} className="border-b border-gray-300 pb-2 mb-4">
-      {/* ... JSX do cabeçalho ... (copie do arquivo original se necessário) */}
+      <div className="flex justify-between items-center">
+        {/* <img src={logoColegio} alt="Logo do Colégio" className="h-20 w-auto" /> */}
+        <div className="text-right w-full">
+          <h2 className="text-xl font-bold text-blue-700">{template}</h2>
+          <p className="text-sm text-gray-600">{disciplina}</p>
+        </div>
+      </div>
+      <div className="flex justify-between text-[10px] text-gray-600 mt-2 border-t pt-2">
+        <span>Aluno(a): _________________________________________</span>
+        <span>Série: {serie}</span>
+        <span>Turma: {turma}</span>
+        <span>Data: ____/____/______</span>
+      </div>
     </header>
-  ));
-  
-const Rodape = React.forwardRef<HTMLElement, { paginaAtual: number; totalPaginas: number }>(({ paginaAtual, totalPaginas }, ref) => (
+));
+
+const Rodape = React.forwardRef<HTMLElement, RodapeProps>(
+  ({ paginaAtual, totalPaginas }, ref) => (
     <footer ref={ref} className="border-t border-gray-300 pt-2 mt-auto text-center text-xs text-gray-500">
       <p>Nome do Colégio | Página {paginaAtual} de {totalPaginas}</p>
     </footer>
 ));
-  
-const PaginaComponent: React.FC<{
-    questoes: Questao[];
-    template: string;
-    paginaInfo: { numero: number; total: number };
-  }> = ({ questoes, template, paginaInfo }) => {
+
+const PaginaComponent: React.FC<PaginaComponentProps> = ({ questoes, template, disciplina, serie, turma, paginaInfo }) => {
     const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);
     return (
       <div className="page flex flex-col">
-        {/* Cabeçalho e Rodapé são renderizados aqui, mas os refs são gerenciados pelo Preview */}
-        {paginaInfo.numero === 1 && <Cabecalho template={template} disciplina={""} serie={""} turma={""} />}
+        {paginaInfo.numero === 1 && <Cabecalho template={template} disciplina={disciplina} serie={serie} turma={turma} />}
         <main className={`flex-grow overflow-hidden ${usarDuasColunas ? 'page-content-duas-colunas' : ''}`}>
           {questoes.map(questao => (
             <div key={questao.id} className="mb-4 questao-preview-item">
@@ -70,8 +84,6 @@ const EmptyState: React.FC = () => (
   </div>
 );
 
-// --- Componente Principal ---
-
 function Preview({ questoes, template, disciplina, serie, turma, isPrinting = false }: PreviewProps) {
   const headerRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLElement>(null);
@@ -90,28 +102,70 @@ function Preview({ questoes, template, disciplina, serie, turma, isPrinting = fa
     }
   }, [paginas, paginaVisivel]);
 
-  // Se for para impressão, renderiza todas as páginas
+  const ControlesNavegacao = () => (
+    <div className="flex items-center justify-center gap-4 p-2 bg-white rounded-lg shadow-md w-fit mx-auto">
+      <button 
+        onClick={() => setPaginaVisivel(p => Math.max(0, p - 1))} 
+        disabled={paginaVisivel === 0}
+        className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        <FiChevronLeft size={20} />
+      </button>
+      <span className="font-semibold text-gray-700 text-sm">
+        Página {paginaVisivel + 1} de {paginas.length || 1}
+      </span>
+      <button 
+        onClick={() => setPaginaVisivel(p => Math.min(paginas.length - 1, p + 1))} 
+        disabled={!paginas.length || paginaVisivel >= paginas.length - 1}
+        className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        <FiChevronRight size={20} />
+      </button>
+    </div>
+  );
+  
   if (isPrinting) {
-    // ... (lógica de impressão)
+    return (
+      <>
+        {paginas.map((paginaQuestoes, index) => (
+          <div key={index} className="page-wrapper-print">
+            <PaginaComponent 
+              questoes={paginaQuestoes}
+              template={template}
+              disciplina={disciplina}
+              serie={serie}
+              turma={turma}
+              paginaInfo={{ numero: index + 1, total: paginas.length }}
+            />
+          </div>
+        ))}
+      </>
+    );
   }
 
   const paginaAtual = paginas[paginaVisivel] || [];
 
   return (
     <div className="flex flex-col h-full w-full">
-      {/* Medidores ocultos */}
-      <div style={{ position: 'absolute', visibility: 'hidden', zIndex: -1, width: '18cm' }}>
+      <div style={{ position: 'absolute', opacity: 0, zIndex: -1, width: '18cm' }}>
         <Cabecalho ref={headerRef} template={template} disciplina={disciplina} serie={serie} turma={turma} />
         <Rodape ref={footerRef} paginaAtual={1} totalPaginas={1} />
         {MedidorDeAltura}
       </div>
 
       <div className="preview-container" ref={pageContainerRef}>
-        <div className="page-wrapper" ref={pageWrapperRef} style={{ transform: `scale(${scale})`}}>
+        <div 
+          className="page-wrapper" 
+          ref={pageWrapperRef} 
+          style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
+        >
           {paginas.length > 0 ? (
-            <PaginaComponent
+            <PaginaComponent 
               questoes={paginaAtual}
               template={template}
+              disciplina={disciplina}
+              serie={serie}
+              turma={turma}
               paginaInfo={{ numero: paginaVisivel + 1, total: paginas.length }}
             />
           ) : (
@@ -119,7 +173,7 @@ function Preview({ questoes, template, disciplina, serie, turma, isPrinting = fa
           )}
         </div>
       </div>
-       {/* ... (Controles de navegação) ... */}
+      {(paginas.length > 1) && <div className="pt-4 flex-shrink-0"><ControlesNavegacao /></div>}
     </div>
   );
 }

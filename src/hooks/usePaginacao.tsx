@@ -1,33 +1,30 @@
 import React, { useState, useEffect, useRef, ReactElement } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Questao } from '../types'; // Importando nosso tipo!
+import { Questao } from '../types';
 
-// Constantes para as dimensões da página em pixels (aproximado para 96 DPI)
+// Constantes movidas para o topo do arquivo para estarem sempre acessíveis
 const PAGE_HEIGHT_PX = 1122.8; 
-const PAGE_PADDING_Y_PX = 56.7; // 1.5cm de padding (superior + inferior)
-const MARGEM_ENTRE_QUESTOES_PX = 16; // 0.42cm de margem
+const PAGE_PADDING_Y_PX = 56.7;
+const MARGEM_ENTRE_QUESTOES_PX = 16;
 
-// 1. Tipagem para o retorno do hook
 interface PaginacaoResult {
-  paginas: Questao[][]; // Um array de arrays de Questao
-  MedidorDeAltura: ReactElement; // O componente JSX que faz a medição
+  paginas: Questao[][];
+  MedidorDeAltura: ReactElement;
 }
 
 export const usePaginacao = (
   questoes: Questao[],
-  headerRef: React.RefObject<HTMLElement>, // Tipando as refs
-  footerRef: React.RefObject<HTMLElement>
+  headerRef: React.RefObject<HTMLElement | null>,
+  footerRef: React.RefObject<HTMLElement | null>
 ): PaginacaoResult => {
   const [paginas, setPaginas] = useState<Questao[][]>([]);
-  
-  // 2. Tipando o objeto de refs para as questões
   const refs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const hasMeasured = useRef(false);
 
   useEffect(() => {
     hasMeasured.current = false;
   }, [questoes]);
-
+  
   const calcularPaginas = () => {
     const allRefsReady = questoes.every(q => refs.current[q.id]);
     if (!questoes.length || !footerRef.current || !headerRef.current || !allRefsReady || hasMeasured.current) {
@@ -68,7 +65,7 @@ export const usePaginacao = (
     
     setPaginas(novasPaginas);
   };
-
+  
   useEffect(() => {
     const timeoutId = setTimeout(calcularPaginas, 150);
     return () => clearTimeout(timeoutId);
