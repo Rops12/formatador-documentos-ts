@@ -1,13 +1,64 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos do Editor */
+.editor-container .EasyMDEContainer { border: 1px solid #d1d5db; border-radius: 0.5rem; }
+.editor-container .editor-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; border-bottom: 1px solid #d1d5db; background-color: #f9fafb; }
+.editor-container .editor-toolbar a.active, .editor-container .editor-toolbar a:hover { background: #e5e7eb; border-color: #d1d5db; }
+.editor-container .CodeMirror { border: none; border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+.editor-container .editor-statusbar { display: none; }
+
+/* --- ESTILOS DA PRÉ-VISUALIZAÇÃO --- */
+
+/* Container cinza */
+.preview-container {
+  background-color: #e2e8f0;
+  border-radius: 0.5rem;
+  width: 100%;
+  height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  overflow: hidden;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Wrapper da página que será escalonado na tela */
+.page-wrapper {
+  width: 21cm;
+  height: 29.7cm;
+  flex-shrink: 0;
+}
+
+/* A folha branca */
+.page {
+  background: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 100%;
+  padding: 1.5cm;
+  box-sizing: border-box;
+  font-size: 10pt;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.page .prose { font-size: inherit; line-height: inherit; }
+.page .prose p, .page .prose ol, .page .prose ul { margin: 0.5em 0; }
+.page-content-duas-colunas { column-count: 2; column-gap: 1cm; }
+.questao-preview-item { break-inside: avoid; }
+
+/* Wrapper para as páginas na hora de renderizar para o PDF */
+/* Ele garante que cada página tenha o tamanho exato de um A4 */
+.page-wrapper-print {
+  width: 21cm;
+  height: 29.7cm;
+  overflow: hidden;
+}
+
+.page-wrapper-print .page {
+  box-shadow: none;
 }
