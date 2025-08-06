@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-// import logoColegio from '../assets/logo.svg';
+import logoColegio from '../assets/logo.svg';
 import { FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-
 import { Questao } from '../types';
 import { usePaginacao } from '../hooks/usePaginacao';
 import { usePageScale } from '../hooks/usePageScale';
@@ -27,7 +26,7 @@ const Cabecalho = React.forwardRef<HTMLElement, CabecalhoProps>(
   ({ template, disciplina, serie, turma }, ref) => (
     <header ref={ref} className="border-b border-gray-300 pb-2 mb-4">
       <div className="flex justify-between items-center">
-        {/* <img src={logoColegio} alt="Logo do Colégio" className="h-20 w-auto" /> */}
+        {/* <img src={logo.svg} alt="Logo do Colégio" className="h-20 w-auto" /> */}
         <div className="text-right w-full">
           <h2 className="text-xl font-bold text-blue-700">{template}</h2>
           <p className="text-sm text-gray-600">{disciplina}</p>
