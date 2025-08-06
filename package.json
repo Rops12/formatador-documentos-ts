@@ -53,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-icons": "^2.2.7",
     "tailwindcss": "^3.4.17"
   }
 }

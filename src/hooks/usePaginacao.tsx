@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, ReactElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Questao } from '../types';
 
-// Constantes movidas para o topo do arquivo
+// Constantes devem estar aqui
 const PAGE_HEIGHT_PX = 1122.8; 
 const PAGE_PADDING_Y_PX = 56.7;
 const MARGEM_ENTRE_QUESTOES_PX = 16;
@@ -17,6 +17,8 @@ export const usePaginacao = (
   headerRef: React.RefObject<HTMLElement | null>,
   footerRef: React.RefObject<HTMLElement | null>
 ): PaginacaoResult => {
+  // ... (o resto do código permanece o mesmo)
+  // O código completo está abaixo para garantir
   const [paginas, setPaginas] = useState<Questao[][]>([]);
   const refs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const hasMeasured = useRef(false);
