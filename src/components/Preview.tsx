@@ -26,7 +26,7 @@ const Cabecalho = React.forwardRef<HTMLElement, CabecalhoProps>(
   ({ template, disciplina, serie, turma }, ref) => (
     <header ref={ref} className="border-b border-gray-300 pb-2 mb-4">
       <div className="flex justify-between items-center">
-        {/* <img src={logo.svg} alt="Logo do Colégio" className="h-20 w-auto" /> */}
+        <img src={logoColegio} alt="Logo do Colégio" className="h-20 w-auto" /> {/* LINHA CORRIGIDA */}
         <div className="text-right w-full">
           <h2 className="text-xl font-bold text-blue-700">{template}</h2>
           <p className="text-sm text-gray-600">{disciplina}</p>
