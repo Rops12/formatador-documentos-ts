@@ -76,14 +76,11 @@
 /* Wrapper para as páginas na hora de renderizar para o PDF */
 .page-wrapper-print {
   width: 21cm;
-  /* AQUI ESTÁ A GRANDE CORREÇÃO: a altura deve ser automática! */
-  height: auto; 
-  overflow: visible; /* Garantir que nada seja cortado */
+  height: 29.7cm; /* VOLTAMOS A TER ALTURA FIXA */
+  overflow: hidden;
+  page-break-after: always; /* Ajuda na impressão direta */
 }
 
 .page-wrapper-print .page {
   box-shadow: none;
-  /* A página de impressão não deve ter altura máxima, ela cresce com o conteúdo */
-  height: auto;
-  min-height: 29.7cm; /* Garante que páginas com pouco conteúdo ainda tenham o tamanho de A4 */
 }

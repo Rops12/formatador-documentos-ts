@@ -1,7 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Questao } from '../types';
+import { usePaginacao } from '../hooks/usePaginacao';
 import { usePageScale } from '../hooks/usePageScale';
+import { PaginaLayout } from './PaginaLayout'; // Importamos nosso novo layout
 
 interface PreviewProps {
   questoes: Questao[];
@@ -9,86 +11,77 @@ interface PreviewProps {
   disciplina: string;
   serie: string;
   turma: string;
+  isPrinting?: boolean; // Adicionamos esta prop para o modo de geração de PDF
 }
 
-const Cabecalho: React.FC<Omit<PreviewProps, 'questoes'>> = ({ template, disciplina, serie, turma }) => (
-    <header className="border-b border-gray-300 pb-2 mb-4">
-      <div className="flex justify-between items-center">
-        <div className="h-20 w-20 bg-gray-200 flex items-center justify-center text-xs text-gray-500">Logo</div>
-        <div className="text-right w-full">
-          <h2 className="text-xl font-bold text-blue-700">{template}</h2>
-          <p className="text-sm text-gray-600">{disciplina}</p>
-        </div>
-      </div>
-      <div className="flex justify-between text-[10px] text-gray-600 mt-2 border-t pt-2">
-        <span>Aluno(a): _________________________________________</span>
-        <span>Série: {serie}</span>
-        <span>Turma: {turma}</span>
-        <span>Data: ____/____/______</span>
-      </div>
-    </header>
-);
-
-// Rodapé estático para o preview
-const RodapePreview = () => (
-    <footer className="border-t border-gray-300 pt-2 mt-auto text-center text-xs text-gray-500">
-      <p>Fim do documento</p>
-    </footer>
-);
-
-
-function Preview({ questoes, template, disciplina, serie, turma }: PreviewProps) {
+function Preview({ questoes, template, disciplina, serie, turma, isPrinting = false }: PreviewProps) {
+  const [paginaVisivel, setPaginaVisivel] = useState(0);
+  
+  const headerRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+  
   const pageContainerRef = useRef<HTMLDivElement>(null);
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const scale = usePageScale(pageWrapperRef, pageContainerRef);
 
+  const { paginas, MedidorDeAltura } = usePaginacao(questoes, headerRef, footerRef);
+
   const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);
+
+  const renderPaginas = () => (
+    paginas.map((paginaQuestoes, index) => (
+      <PaginaLayout
+        key={index}
+        cabecalhoProps={index === 0 ? { template, disciplina, serie, turma } : undefined}
+        rodapeProps={{ paginaAtual: index + 1, totalPaginas: paginas.length }}
+      >
+        <div className={usarDuasColunas ? 'page-content-duas-colunas' : ''}>
+          {paginaQuestoes.map(questao => (
+            <div key={questao.id} className="questao-preview-item">
+              <div className="prose prose-sm max-w-none">
+                <div className="font-semibold text-gray-900">Questão {questao.numero}</div>
+                <div className="enunciado"><ReactMarkdown>{questao.enunciado}</ReactMarkdown></div>
+                {questao.tipo === 'multipla-escolha' && questao.alternativas && (
+                  <ol type="a" className="list-[lower-alpha] pl-5 mt-2 space-y-1">
+                    {questao.alternativas.map(alt => <li key={alt.id}>{alt.texto}</li>)}
+                  </ol>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </PaginaLayout>
+    ))
+  );
+
+  if (isPrinting) {
+    return <>{renderPaginas()}</>;
+  }
 
   return (
     <div className="flex flex-col h-full w-full">
-      <div 
-        className="preview-container bg-gray-200 rounded-lg overflow-hidden" 
-        ref={pageContainerRef}
-      >
-        <div 
-          className="page-wrapper w-[21cm] h-[29.7cm] flex-shrink-0 overflow-auto" // A rolagem vai aqui!
-          ref={pageWrapperRef} 
-          style={{ 
-            transform: `scale(${scale})`, 
-            transformOrigin: 'center center',
-          }}
-        >
-          <div className="page bg-white shadow-lg p-[1.5cm] box-border text-[10pt]">
-            <Cabecalho template={template} disciplina={disciplina} serie={serie} turma={turma} />
-            <main className={`flex-grow ${usarDuasColunas ? 'page-content-duas-colunas' : ''}`}>
-              {questoes.length > 0 ? questoes.map(questao => (
-                <div key={questao.id} className="questao-preview-item">
-                  <div className="prose prose-sm max-w-none">
-                    <div className="font-semibold text-gray-900">Questão {questao.numero}</div>
-                    <div className="enunciado"><ReactMarkdown>{questao.enunciado}</ReactMarkdown></div>
-                    {questao.tipo === 'multipla-escolha' && questao.alternativas && (
-                      <ol type="a" className="list-[lower-alpha] pl-5 mt-2 space-y-1">
-                        {questao.alternativas.map(alt => <li key={alt.id}>{alt.texto}</li>)}
-                      </ol>
-                    )}
-                  </div>
-                </div>
-              )) : (
-                <div className="flex items-center justify-center text-center text-gray-500 h-64">
-                    <div>
-                        <h3 className="font-semibold text-gray-700">Pré-visualização do Documento</h3>
-                        <p className="text-sm mt-1">As questões aparecerão aqui.</p>
-                    </div>
-                </div>
-              )}
-            </main>
-             {questoes.length > 0 && <RodapePreview />}
-          </div>
+      {/* Medidor de altura invisível para o hook usePaginacao */}
+      {MedidorDeAltura}
+      
+      {/* Elementos invisíveis para medir o cabeçalho e rodapé */}
+      <div style={{ position: 'absolute', visibility: 'hidden', zIndex: -1 }}>
+          <header ref={headerRef} className="border-b border-gray-300 pb-2 mb-4 flex-shrink-0">Cabeçalho Teste</header>
+          <footer ref={footerRef} className="border-t border-gray-300 pt-2 mt-auto text-xs text-gray-500 flex-shrink-0">Rodapé Teste</footer>
+      </div>
+
+      <div className="preview-container" ref={pageContainerRef}>
+        <div ref={pageWrapperRef} style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+          {paginas.length > 0 && renderPaginas()[paginaVisivel]}
         </div>
       </div>
-      <p className="text-center text-xs text-gray-500 mt-2">
-        O preview agora é rolável para refletir fielmente o conteúdo do PDF.
-      </p>
+
+      {paginas.length > 1 && (
+        <div className="flex justify-center items-center mt-4 gap-4">
+          <button onClick={() => setPaginaVisivel(p => Math.max(0, p - 1))} disabled={paginaVisivel === 0} className="px-4 py-2 bg-white rounded shadow disabled:opacity-50">Anterior</button>
+          <span>Página {paginaVisivel + 1} de {paginas.length}</span>
+          <button onClick={() => setPaginaVisivel(p => Math.min(paginas.length - 1, p + 1))} disabled={paginaVisivel === paginas.length - 1} className="px-4 py-2 bg-white rounded shadow disabled:opacity-50">Próxima</button>
+        </div>
+      )}
     </div>
   );
 }
