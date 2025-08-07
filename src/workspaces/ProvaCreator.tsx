@@ -37,7 +37,6 @@ function ProvaCreator({ onVoltar }: ProvaCreatorProps) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
   const [paginaVisivel, setPaginaVisivel] = useState(0);
   
-  // Garante que a disciplina correta seja atribuída e renumera as questões
   const questoesParaPaginacao = useMemo(() => 
     questoes.map((q, i) => ({ ...q, numero: i + 1, disciplina })),
     [questoes, disciplina]
@@ -166,18 +165,20 @@ function ProvaCreator({ onVoltar }: ProvaCreatorProps) {
               cabecalhoProps={index === 0 ? { template, disciplina, serie, turma } : undefined}
               rodapeProps={{ paginaAtual: index + 1, totalPaginas }}
             >
-              {pagina.map(questao => (
-                <div key={questao.id} className="questao-preview-item">
-                  <div className="prose prose-sm max-w-none">
-                    <div className="font-semibold text-gray-900">Questão {questao.numero}</div>
-                    {questao.imagemUrl && <img src={questao.imagemUrl} alt={`Imagem da questão ${questao.numero}`} className="max-w-full h-auto my-2"/>}
-                    <div className="enunciado"><ReactMarkdown>{questao.enunciado}</ReactMarkdown></div>
-                    {questao.tipo === 'multipla-escolha' && questao.alternativas && ( <ol type="a" className="list-[lower-alpha] pl-5 mt-2 space-y-1">{questao.alternativas.map(alt => <li key={alt.id}>{alt.texto}</li>)}</ol>)}
-                    {questao.tipo === 'dissertativa' && questao.linhasResposta && questao.linhasResposta > 0 && (<div className="mt-4">{Array.from({ length: questao.linhasResposta }).map((_, i) => (<div key={i} className="linhas-resposta"></div>))}</div>)}
-                    {questao.tipo === 'verdadeiro-falso' && questao.afirmativas && (<ol className="list-none p-0 mt-2 space-y-2">{questao.afirmativas.map(af => (<li key={af.id} className="flex items-start"><span className="mr-2 font-mono">( )</span><span>{af.texto}</span></li>))}</ol>)}
+              <div className={'' /* Sem duas colunas para provas normais */}>
+                {pagina.map(questao => (
+                  <div key={questao.id} className="questao-preview-item">
+                    <div className="prose prose-sm max-w-none">
+                      <div className="font-semibold text-gray-900">Questão {questao.numero}</div>
+                      {questao.imagemUrl && <img src={questao.imagemUrl} alt={`Imagem da questão ${questao.numero}`} className="max-w-full h-auto my-2"/>}
+                      <div className="enunciado"><ReactMarkdown>{questao.enunciado}</ReactMarkdown></div>
+                      {questao.tipo === 'multipla-escolha' && questao.alternativas && ( <ol type="a" className="list-[lower-alpha] pl-5 mt-2 space-y-1">{questao.alternativas.map(alt => <li key={alt.id}>{alt.texto}</li>)}</ol>)}
+                      {questao.tipo === 'dissertativa' && questao.linhasResposta && questao.linhasResposta > 0 && (<div className="mt-4">{Array.from({ length: questao.linhasResposta }).map((_, i) => (<div key={i} className="linhas-resposta"></div>))}</div>)}
+                      {questao.tipo === 'verdadeiro-falso' && questao.afirmativas && (<ol className="list-none p-0 mt-2 space-y-2">{questao.afirmativas.map(af => (<li key={af.id} className="flex items-start"><span className="mr-2 font-mono">( )</span><span>{af.texto}</span></li>))}</ol>)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </PaginaLayout>
           ))}
         </div>

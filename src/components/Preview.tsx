@@ -41,6 +41,21 @@ function Preview({
   const usarDuasColunas = isSimulado;
   const templateStyles = config.templateStyles[template] || {};
 
+  // Se não houver páginas, mostra um placeholder
+  if (totalPaginas === 0) {
+    return (
+      <div className="flex flex-col h-full w-full">
+        <div className="preview-container" ref={pageContainerRef}>
+          <div className="page-wrapper" ref={pageWrapperRef} style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+            <div className="page flex items-center justify-center text-gray-400">
+              Preview aparecerá aqui.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // --- Lógica de Renderização Condicional para o Preview ---
 
   // Renderiza a Capa do Simulado
@@ -94,13 +109,10 @@ function Preview({
       </div>
     );
   }
-
-  // Agrupa as questões por disciplina, necessário para a renderização interna da página
+  
   const questoesAgrupadas: Record<string, Questao[]> = paginaQuestoes.reduce((acc, questao) => {
     const key = questao.disciplina || 'default';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(questao);
-    return acc;
+    if (!acc[key]) acc[key] = []; acc[key].push(questao); return acc;
   }, {} as Record<string, Questao[]>);
 
 
@@ -110,7 +122,6 @@ function Preview({
       <div className="preview-container" ref={pageContainerRef}>
         <PaginaLayout
           ref={pageWrapperRef}
-          // Para simulados, o cabeçalho é apenas na capa. Para provas, na primeira página de conteúdo.
           cabecalhoProps={!isSimulado && paginaAtual === 1 ? { template, disciplina, serie, turma } : undefined}
           rodapeProps={{ paginaAtual, totalPaginas }}
           style={{ ...templateStyles, transform: `scale(${scale})`, transformOrigin: 'center center' }}
@@ -129,31 +140,9 @@ function Preview({
                         <div className="font-semibold text-gray-900">Questão {questao.numero}</div>
                         {questao.imagemUrl && <img src={questao.imagemUrl} alt={`Imagem da questão ${questao.numero}`} className="max-w-full h-auto my-2"/>}
                         <div className="enunciado"><ReactMarkdown>{questao.enunciado}</ReactMarkdown></div>
-                        
-                        {questao.tipo === 'multipla-escolha' && questao.alternativas && (
-                          <ol type="a" className="list-[lower-alpha] pl-5 mt-2 space-y-1">
-                            {questao.alternativas.map(alt => <li key={alt.id}>{alt.texto}</li>)}
-                          </ol>
-                        )}
-
-                        {questao.tipo === 'dissertativa' && questao.linhasResposta && questao.linhasResposta > 0 && (
-                          <div className="mt-4">
-                            {Array.from({ length: questao.linhasResposta }).map((_, i) => (
-                              <div key={i} className="linhas-resposta"></div>
-                            ))}
-                          </div>
-                        )}
-
-                        {questao.tipo === 'verdadeiro-falso' && questao.afirmativas && (
-                           <ol className="list-none p-0 mt-2 space-y-2">
-                              {questao.afirmativas.map(af => (
-                                <li key={af.id} className="flex items-start">
-                                  <span className="mr-2 font-mono">( )</span>
-                                  <span>{af.texto}</span>
-                                </li>
-                              ))}
-                           </ol>
-                        )}
+                        {questao.tipo === 'multipla-escolha' && questao.alternativas && ( <ol type="a" className="list-[lower-alpha] pl-5 mt-2 space-y-1">{questao.alternativas.map(alt => <li key={alt.id}>{alt.texto}</li>)}</ol>)}
+                        {questao.tipo === 'dissertativa' && questao.linhasResposta && questao.linhasResposta > 0 && (<div className="mt-4">{Array.from({ length: questao.linhasResposta }).map((_, i) => (<div key={i} className="linhas-resposta"></div>))}</div>)}
+                        {questao.tipo === 'verdadeiro-falso' && questao.afirmativas && (<ol className="list-none p-0 mt-2 space-y-2">{questao.afirmativas.map(af => (<li key={af.id} className="flex items-start"><span className="mr-2 font-mono">( )</span><span>{af.texto}</span></li>))}</ol>)}
                       </div>
                     </div>
                   ))}

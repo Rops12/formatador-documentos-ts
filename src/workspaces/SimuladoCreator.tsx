@@ -10,7 +10,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { FiPlus, FiX } from 'react-icons/fi';
+import { FiX } from 'react-icons/fi';
 
 import { useConfiguracao } from '../context/ConfiguracaoContext';
 import ReactMarkdown from 'react-markdown';
@@ -38,12 +38,11 @@ function SimuladoCreator({ onVoltar }: SimuladoCreatorProps) {
   
   const [idQuestaoEditando, setIdQuestaoEditando] = useState<number | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
-  const [paginaVisivel, setPaginaVisivel] = useState(0);
+  const [paginaPreviewAtual, setPaginaPreviewAtual] = useState(1);
 
   const questoesParaPaginacao = useMemo(() => {
     const questoesFiltradas = questoes.filter(q => disciplinasSimulado.includes(q.disciplina || ''));
     
-    // Ordena primeiro pela ordem das abas de disciplina, depois pela ordem original
     const questoesOrdenadas = [...questoesFiltradas].sort((a, b) => {
       const indexA = disciplinasSimulado.indexOf(a.disciplina || '');
       const indexB = disciplinasSimulado.indexOf(b.disciplina || '');
@@ -54,7 +53,6 @@ function SimuladoCreator({ onVoltar }: SimuladoCreatorProps) {
       return ordemOriginalA - ordemOriginalB;
     });
     
-    // Renumera todas as questões na ordem final
     return questoesOrdenadas.map((q, i) => ({ ...q, numero: i + 1 }));
   }, [questoes, disciplinasSimulado]);
 
@@ -93,15 +91,18 @@ function SimuladoCreator({ onVoltar }: SimuladoCreatorProps) {
     if (disciplinaParaAdd && !disciplinasSimulado.includes(disciplinaParaAdd)) {
       const novasDisciplinas = [...disciplinasSimulado, disciplinaParaAdd];
       setDisciplinasSimulado(novasDisciplinas);
-      setDisciplinaAtiva(disciplinaParaAdd);
+      if(!disciplinaAtiva) {
+        setDisciplinaAtiva(disciplinaParaAdd);
+      }
     }
   };
 
   const handleRemoverDisciplina = (disciplinaParaRemover: string) => {
-    setDisciplinasSimulado(disciplinasSimulado.filter(d => d !== disciplinaParaRemover));
+    const novasDisciplinas = disciplinasSimulado.filter(d => d !== disciplinaParaRemover);
+    setDisciplinasSimulado(novasDisciplinas);
     setQuestoes(questoes.filter(q => q.disciplina !== disciplinaParaRemover));
     if (disciplinaAtiva === disciplinaParaRemover) {
-      setDisciplinaAtiva(disciplinasSimulado[0] || null);
+      setDisciplinaAtiva(novasDisciplinas[0] || null);
     }
   };
   
@@ -135,12 +136,19 @@ function SimuladoCreator({ onVoltar }: SimuladoCreatorProps) {
   
   const totalPaginasConteudo = paginas.length;
   const totalPaginasFinal = totalPaginasConteudo > 0 ? totalPaginasConteudo + 2 : 0;
-  const paginaAtualQuestoes = paginas[paginaVisivel] || [];
+  
+  // Lógica para determinar qual array de questões passar para o preview
+  const paginaConteudoIndex = paginaPreviewAtual - 2; // -1 pela capa, -1 pelo índice do array
+  const paginaAtualQuestoes = (paginaPreviewAtual > 1 && paginaPreviewAtual < totalPaginasFinal) 
+    ? paginas[paginaConteudoIndex] || [] 
+    : [];
 
   return (
     <>
       {MedidorDeAltura}
-      <div style={{ position: 'absolute', visibility: 'hidden', zIndex: -10, opacity: 0 }}><div ref={footerRef}><Rodape paginaAtual={1} totalPaginas={1} /></div></div>
+      <div style={{ position: 'absolute', visibility: 'hidden', zIndex: -10, opacity: 0 }}>
+        <div ref={footerRef}><Rodape paginaAtual={1} totalPaginas={1} /></div>
+      </div>
       
       <div className="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-8">
          <header className="max-w-screen-2xl mx-auto mb-4 flex justify-end">
@@ -168,7 +176,7 @@ function SimuladoCreator({ onVoltar }: SimuladoCreatorProps) {
                       <button onClick={(e) => { e.stopPropagation(); handleRemoverDisciplina(disc); }} className="text-xs hover:text-red-500 rounded-full p-1 -mr-2"><FiX /></button>
                     </div>
                   ))}
-                  <select onChange={(e) => handleAdicionarDisciplina(e.target.value)} value="" className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm appearance-none text-gray-600">
+                  <select onChange={(e) => { handleAdicionarDisciplina(e.target.value); e.target.value = ""}} value="" className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm text-gray-600">
                     <option value="" disabled>+ Adicionar Disciplina</option>
                     {disciplinasDisponiveis.filter(d => !disciplinasSimulado.includes(d)).map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
@@ -204,27 +212,25 @@ function SimuladoCreator({ onVoltar }: SimuladoCreatorProps) {
           </div>
 
           <div className="sticky top-8 h-fit">
-            <Preview paginaQuestoes={paginaAtualQuestoes} paginaAtual={paginaVisivel + 1} totalPaginas={totalPaginasFinal} onAnterior={() => setPaginaVisivel(p => Math.max(0, p - 1))} onProxima={() => setPaginaVisivel(p => Math.min(totalPaginasConteudo > 0 ? totalPaginasConteudo - 1 : 0, p + 1))} template={template} disciplina="Simulado" serie={serie} turma={turma} />
+            <Preview paginaQuestoes={paginaAtualQuestoes} paginaAtual={paginaPreviewAtual} totalPaginas={totalPaginasFinal} onAnterior={() => setPaginaPreviewAtual(p => Math.max(1, p - 1))} onProxima={() => setPaginaPreviewAtual(p => Math.min(totalPaginasFinal, p + 1))} template={template} disciplina="Simulado" serie={serie} turma={turma} />
           </div>
         </div>
       </div>
        
       {isGeneratingPdf && (
         <div id="pdf-render-container-simulado" className="absolute top-0 left-0" style={{ zIndex: -10, opacity: 0 }}>
-           {/* Capa */}
-           <PaginaLayout rodapeProps={{ paginaAtual: 1, totalPaginas: totalPaginasFinal }} className="page-capa">
-              <h1 className="text-4xl font-bold">{template}</h1>
-              <h2 className="text-2xl mt-4">Simulado Multidisciplinar</h2>
-              <div className="mt-12 text-lg"><p>Série: {serie}</p><p>Turma: {turma}</p></div>
-           </PaginaLayout>
+           {totalPaginasFinal > 0 && (
+             <PaginaLayout rodapeProps={{ paginaAtual: 1, totalPaginas: totalPaginasFinal }} className="page-capa">
+                <h1 className="text-4xl font-bold">{template}</h1>
+                <h2 className="text-2xl mt-4">Simulado Multidisciplinar</h2>
+                <div className="mt-12 text-lg"><p>Série: {serie}</p><p>Turma: {turma}</p></div>
+             </PaginaLayout>
+           )}
 
-           {/* Páginas de Conteúdo */}
            {paginas.map((paginaQuestoes, index) => {
               const questoesAgrupadas: Record<string, Questao[]> = paginaQuestoes.reduce((acc, questao) => {
                 const key = questao.disciplina || 'default';
-                if (!acc[key]) acc[key] = [];
-                acc[key].push(questao);
-                return acc;
+                if (!acc[key]) acc[key] = []; acc[key].push(questao); return acc;
               }, {} as Record<string, Questao[]>);
 
               return (
@@ -257,11 +263,12 @@ function SimuladoCreator({ onVoltar }: SimuladoCreatorProps) {
               )
            })}
 
-           {/* Fundo */}
-           <PaginaLayout rodapeProps={{ paginaAtual: totalPaginasFinal, totalPaginas: totalPaginasFinal }} className="page-fundo">
-              <div className="h-20 w-20 mb-8">{config.logoUrl && <img src={config.logoUrl} alt="Logo"/>}</div>
-              <h2 className="text-2xl">BOA PROVA!</h2>
-           </PaginaLayout>
+           {totalPaginasFinal > 1 && (
+             <PaginaLayout rodapeProps={{ paginaAtual: totalPaginasFinal, totalPaginas: totalPaginasFinal }} className="page-fundo">
+                <div className="h-20 w-20 mb-8">{config.logoUrl && <img src={config.logoUrl} alt="Logo"/>}</div>
+                <h2 className="text-2xl">BOA PROVA!</h2>
+             </PaginaLayout>
+           )}
         </div>
       )}
     </>
