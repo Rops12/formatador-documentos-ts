@@ -58,24 +58,24 @@ const PrintLayout: React.FC<{
     <div className="page-wrapper-print">
       <div className="page">
         <header className="border-b border-gray-300 pb-2 mb-4">
-          <div className="flex justify-between items-center">
-            {/* Se você tiver o logo, mantenha a tag img. Caso contrário, pode remover. */}
-            {/* <img src={logoColegio} alt="Logo do Colégio" className="h-20 w-auto" /> */}
-            <div className="text-right w-full">
-              <h2 className="text-xl font-bold text-blue-700">{template}</h2>
-              <p className="text-sm text-gray-600">{disciplina}</p>
+            {/* ... (código do cabeçalho igual ao anterior) ... */}
+            <div className="flex justify-between items-center">
+              <div className="h-20 w-20 bg-gray-200 flex items-center justify-center text-xs text-gray-500">Logo</div>
+              <div className="text-right w-full">
+                <h2 className="text-xl font-bold text-blue-700">{template}</h2>
+                <p className="text-sm text-gray-600">{disciplina}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex justify-between text-[10px] text-gray-600 mt-2 border-t pt-2">
-            <span>Aluno(a): _________________________________________</span>
-            <span>Série: {serie}</span>
-            <span>Turma: {turma}</span>
-            <span>Data: ____/____/______</span>
-          </div>
+            <div className="flex justify-between text-[10px] text-gray-600 mt-2 border-t pt-2">
+              <span>Aluno(a): _________________________________________</span>
+              <span>Série: {serie}</span>
+              <span>Turma: {turma}</span>
+              <span>Data: ____/____/______</span>
+            </div>
         </header>
         <main className={`flex-grow ${usarDuasColunas ? 'page-content-duas-colunas' : ''}`}>
           {questoes.map(questao => (
-            <div key={questao.id} className="mb-4 questao-preview-item">
+            <div key={questao.id} className="questao-preview-item">
               <div className="prose prose-sm max-w-none">
                 <div className="font-semibold text-gray-900">Questão {questao.numero}</div>
                 <div className="enunciado"><ReactMarkdown>{questao.enunciado}</ReactMarkdown></div>
@@ -88,11 +88,12 @@ const PrintLayout: React.FC<{
             </div>
           ))}
         </main>
+        {/* Adiciona um espaço no final para o rodapé não sobrepor o conteúdo */}
+        <div style={{ height: '50pt' }} /> 
       </div>
     </div>
   );
 };
-
 
 function App() {
   // --- Estados Tipados ---
@@ -167,6 +168,7 @@ function App() {
   
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'pt', 'a4');
+    
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
   
@@ -177,17 +179,32 @@ function App() {
   
     let heightLeft = imgHeight;
     let position = 0;
+    let pageCount = 1;
   
+    // Adiciona a primeira página
     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
     heightLeft -= pdfHeight;
   
+    // Adiciona as páginas seguintes, se houver
     while (heightLeft > 0) {
-      position = -pdfHeight + (imgHeight - heightLeft);
+      position -= pdfHeight;
       pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
       heightLeft -= pdfHeight;
+      pageCount++;
     }
     
+    // Adiciona o rodapé em TODAS as páginas
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(128);
+      const footerText = `Nome do Colégio | Página ${i} de ${pageCount}`;
+      const textWidth = pdf.getStringUnitWidth(footerText) * pdf.getFontSize() / pdf.internal.scaleFactor;
+      const xOffset = (pdfWidth - textWidth) / 2;
+      pdf.text(footerText, xOffset, pdfHeight - 20); // 20pt da parte inferior
+    }
+
     const fileName = `${template}-${disciplina}-${serie}${turma}.pdf`;
     pdf.save(fileName);
   
