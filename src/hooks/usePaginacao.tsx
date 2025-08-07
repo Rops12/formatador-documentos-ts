@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef, ReactElement } from 'react';
+import React, { useState, useLayoutEffect, useRef, ReactElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Questao } from '../types';
 
-// Constantes devem estar aqui
 const PAGE_HEIGHT_PX = 1122.8; 
-const PAGE_PADDING_Y_PX = 56.7;
+const PAGE_PADDING_Y_PX = 56.7 * 2;
 const MARGEM_ENTRE_QUESTOES_PX = 16;
+// Aumentamos o buffer para garantir que não haja sobreposição
+const BUFFER_SEGURANCA_PX = 40; 
 
 interface PaginacaoResult {
   paginas: Questao[][];
@@ -17,61 +18,65 @@ export const usePaginacao = (
   headerRef: React.RefObject<HTMLElement | null>,
   footerRef: React.RefObject<HTMLElement | null>
 ): PaginacaoResult => {
-  // ... (o resto do código permanece o mesmo)
-  // O código completo está abaixo para garantir
-  const [paginas, setPaginas] = useState<Questao[][]>([]);
+  const [paginas, setPaginas] = useState<Questao[][]>([[]]);
   const refs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const hasMeasured = useRef(false);
 
-  useEffect(() => {
-    hasMeasured.current = false;
-  }, [questoes]);
-  
-  const calcularPaginas = () => {
-    const allRefsReady = questoes.every(q => refs.current[q.id]);
-    if (!questoes.length || !footerRef.current || !headerRef.current || !allRefsReady || hasMeasured.current) {
-      return;
-    }
-
-    hasMeasured.current = true;
-    const headerHeight = headerRef.current.offsetHeight;
-    const footerHeight = footerRef.current.offsetHeight;
-
-    const MAX_CONTENT_HEIGHT_PAG_1 = PAGE_HEIGHT_PX - (PAGE_PADDING_Y_PX * 2) - headerHeight - footerHeight;
-    const MAX_CONTENT_HEIGHT_OUTRAS = PAGE_HEIGHT_PX - (PAGE_PADDING_Y_PX * 2) - footerHeight;
-
-    const novasPaginas: Questao[][] = [];
-    let paginaAtual: Questao[] = [];
-    let alturaAtual = 0;
-
-    questoes.forEach(questao => {
-      const questaoRef = refs.current[questao.id];
-      if (!questaoRef) return;
-
-      const alturaQuestao = questaoRef.offsetHeight + MARGEM_ENTRE_QUESTOES_PX;
-      const maxContentHeight = novasPaginas.length === 0 ? MAX_CONTENT_HEIGHT_PAG_1 : MAX_CONTENT_HEIGHT_OUTRAS;
-
-      if (alturaAtual + alturaQuestao > maxContentHeight && paginaAtual.length > 0) {
-        novasPaginas.push(paginaAtual);
-        paginaAtual = [questao];
-        alturaAtual = alturaQuestao;
-      } else {
-        paginaAtual.push(questao);
-        alturaAtual += alturaQuestao;
+  useLayoutEffect(() => {
+    const calcularPaginas = () => {
+      const allRefsReady = questoes.every(q => refs.current[q.id]);
+      if (!questoes.length || !footerRef.current || !headerRef.current || !allRefsReady) {
+        if (questoes.length > 0) {
+            const timeoutId = setTimeout(calcularPaginas, 50);
+            return () => clearTimeout(timeoutId);
+        }
+        // Se não há questões, define uma página em branco e para
+        setPaginas([[]]);
+        return;
       }
-    });
 
-    if (paginaAtual.length > 0) {
-      novasPaginas.push(paginaAtual);
-    }
-    
-    setPaginas(novasPaginas);
-  };
-  
-  useEffect(() => {
+      const headerHeight = headerRef.current.offsetHeight;
+      const footerHeight = footerRef.current.offsetHeight;
+
+      const MAX_CONTENT_HEIGHT_PAG_1 = PAGE_HEIGHT_PX - PAGE_PADDING_Y_PX - headerHeight - footerHeight - BUFFER_SEGURANCA_PX;
+      const MAX_CONTENT_HEIGHT_OUTRAS = PAGE_HEIGHT_PX - PAGE_PADDING_Y_PX - footerHeight - BUFFER_SEGURANCA_PX;
+
+      const novasPaginas: Questao[][] = [];
+      let paginaAtual: Questao[] = [];
+      let alturaAtual = 0;
+
+      questoes.forEach(questao => {
+        const questaoRef = refs.current[questao.id];
+        if (!questaoRef) return;
+
+        const alturaQuestao = questaoRef.offsetHeight + MARGEM_ENTRE_QUESTOES_PX;
+        const maxContentHeight = novasPaginas.length === 0 ? MAX_CONTENT_HEIGHT_PAG_1 : MAX_CONTENT_HEIGHT_OUTRAS;
+        
+        if (alturaAtual + alturaQuestao > maxContentHeight && paginaAtual.length > 0) {
+          novasPaginas.push(paginaAtual);
+          paginaAtual = [questao];
+          alturaAtual = alturaQuestao;
+        } else {
+          paginaAtual.push(questao);
+          alturaAtual += alturaQuestao;
+        }
+      });
+
+      if (paginaAtual.length > 0) {
+        novasPaginas.push(paginaAtual);
+      }
+      
+      if (novasPaginas.length === 0 && questoes.length > 0) {
+        // Se há questões mas nenhuma página foi criada (ex: uma única questão muito grande),
+        // garante que ela vá para a primeira página.
+        setPaginas([questoes]);
+      } else {
+        setPaginas(novasPaginas);
+      }
+    };
+
     const timeoutId = setTimeout(calcularPaginas, 150);
     return () => clearTimeout(timeoutId);
-  });
+  }, [questoes, headerRef, footerRef]);
 
   const MedidorDeAltura = (
     <div style={{ position: 'absolute', visibility: 'hidden', zIndex: -1, width: '18cm' }}>

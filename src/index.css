@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos do Editor */
+/* Estilos do Editor (sem alterações) */
 .editor-container .EasyMDEContainer { border: 1px solid #d1d5db; border-radius: 0.5rem; }
 .editor-container .editor-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; border-bottom: 1px solid #d1d5db; background-color: #f9fafb; }
 .editor-container .editor-toolbar a.active, .editor-container .editor-toolbar a:hover { background: #e5e7eb; border-color: #d1d5db; }
@@ -12,7 +12,6 @@
 
 /* --- ESTILOS DA PRÉ-VISUALIZAÇÃO --- */
 
-/* Container cinza */
 .preview-container {
   background-color: #e2e8f0;
   border-radius: 0.5rem;
@@ -25,60 +24,41 @@
   overflow: hidden;
 }
 
-/* Wrapper da página que será escalonado na tela */
 .page-wrapper {
   width: 21cm;
   height: 29.7cm;
   flex-shrink: 0;
 }
 
-/* A folha branca */
+/* A folha branca - agora com flexbox para layout correto */
 .page {
   background: white;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   width: 100%;
-  /* A altura agora é `auto` para crescer com o conteúdo, mas com no mínimo 100% */
-  min-height: 100%;
-  height: auto;
+  height: 100%;
   padding: 1.5cm;
   box-sizing: border-box;
   font-size: 10pt;
-  /* Removido o `overflow: hidden` que impedia a rolagem no preview */
-  display: flex;
-  flex-direction: column;
+  display: flex; /* ESSENCIAL */
+  flex-direction: column; /* ESSENCIAL */
+  overflow: hidden; /* Evita que conteúdo estoure visualmente */
 }
 
 .page .prose { font-size: inherit; line-height: inherit; }
 .page .prose p, .page .prose ol, .page .prose ul { margin: 0.5em 0; }
-.page-content-duas-colunas { column-count: 2; column-gap: 1cm; }
+.page-content-duas-colunas { column-count: 2; column-gap: 1cm; flex-grow: 1; }
 
-/* AJUSTE DE QUEBRA DE PÁGINA */
-.questao-preview-item { 
-  /* A regra "break-inside: avoid;" foi removida daqui para permitir que o conteúdo flua. */
-}
-
-.questao-preview-item .enunciado p {
-  /* Evita que um parágrafo quebre deixando apenas uma linha órfã no final da página */
-  orphans: 2; 
-}
-
-.questao-preview-item ol, 
-.questao-preview-item ul {
-  /* Tenta manter a lista de alternativas junto com o enunciado, mas permite quebrar se necessário. */
-  break-before: auto;
-}
-
-.questao-preview-item li {
-  /* Impede que um item de alternativa (o texto de A, B, C...) quebre no meio. */
-  break-inside: avoid;
+/* Adiciona espaçamento entre as questões */
+.questao-preview-item + .questao-preview-item {
+  padding-top: 1rem;
 }
 
 /* Wrapper para as páginas na hora de renderizar para o PDF */
 .page-wrapper-print {
   width: 21cm;
-  height: 29.7cm; /* VOLTAMOS A TER ALTURA FIXA */
+  height: 29.7cm; /* DEVE TER ALTURA FIXA */
   overflow: hidden;
-  page-break-after: always; /* Ajuda na impressão direta */
+  page-break-after: always;
 }
 
 .page-wrapper-print .page {
