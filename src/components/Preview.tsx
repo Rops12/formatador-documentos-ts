@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import logoColegio from '../assets/logo.svg';
 import { FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Questao } from '../types';
 import { usePaginacao } from '../hooks/usePaginacao';
@@ -26,7 +25,9 @@ const Cabecalho = React.forwardRef<HTMLElement, CabecalhoProps>(
   ({ template, disciplina, serie, turma }, ref) => (
     <header ref={ref} className="border-b border-gray-300 pb-2 mb-4">
       <div className="flex justify-between items-center">
-        <img src={logoColegio} alt="Logo do Colégio" className="h-20 w-auto" /> {/* LINHA CORRIGIDA */}
+        <div className="h-20 w-20 bg-gray-200 rounded-lg flex items-center justify-center">
+          <span className="text-gray-500 text-xs">Logo</span>
+        </div>
         <div className="text-right w-full">
           <h2 className="text-xl font-bold text-blue-700">{template}</h2>
           <p className="text-sm text-gray-600">{disciplina}</p>
@@ -41,12 +42,16 @@ const Cabecalho = React.forwardRef<HTMLElement, CabecalhoProps>(
     </header>
 ));
 
+Cabecalho.displayName = 'Cabecalho';
+
 const Rodape = React.forwardRef<HTMLElement, RodapeProps>(
   ({ paginaAtual, totalPaginas }, ref) => (
     <footer ref={ref} className="border-t border-gray-300 pt-2 mt-auto text-center text-xs text-gray-500">
       <p>Nome do Colégio | Página {paginaAtual} de {totalPaginas}</p>
     </footer>
 ));
+
+Rodape.displayName = 'Rodape';
 
 const PaginaComponent: React.FC<PaginaComponentProps> = ({ questoes, template, disciplina, serie, turma, paginaInfo }) => {
     const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);

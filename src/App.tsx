@@ -95,51 +95,51 @@ function App() {
   };
   
   const handleGerarPDF = async () => {
-  if (questoes.length === 0) return;
-  
-  setIsGeneratingPdf(true);
-
-  // Atraso para garantir que o DOM seja atualizado com o `isPrinting`
-  await new Promise(resolve => setTimeout(resolve, 50));
-
-  const container = document.getElementById('pdf-render-container');
-  if (!container) {
-    setIsGeneratingPdf(false);
-    return;
-  }
-
-  const pdf = new jsPDF('p', 'pt', 'a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
-
-  const pagesToRender = container.querySelectorAll('.page-wrapper-print');
-
-  for (let i = 0; i < pagesToRender.length; i++) {
-    const pageElement = pagesToRender[i] as HTMLElement;
+    if (questoes.length === 0) return;
     
-    const canvas = await html2canvas(pageElement, {
-      scale: 2, // Aumenta a resolução para melhor qualidade
-      useCORS: true,
-      width: pageElement.offsetWidth,
-      height: pageElement.offsetHeight,
-    });
+    setIsGeneratingPdf(true);
 
-    const imgData = canvas.toDataURL('image/png');
-    
-    // A primeira página não precisa de um page break antes
-    if (i > 0) {
-      pdf.addPage();
+    // Atraso para garantir que o DOM seja atualizado com o `isPrinting`
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    const container = document.getElementById('pdf-render-container');
+    if (!container) {
+      setIsGeneratingPdf(false);
+      return;
+    }
+
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const pagesToRender = container.querySelectorAll('.page-wrapper-print');
+
+    for (let i = 0; i < pagesToRender.length; i++) {
+      const pageElement = pagesToRender[i] as HTMLElement;
+      
+      const canvas = await html2canvas(pageElement, {
+        scale: 2, // Aumenta a resolução para melhor qualidade
+        useCORS: true,
+        width: pageElement.offsetWidth,
+        height: pageElement.offsetHeight,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      
+      // A primeira página não precisa de um page break antes
+      if (i > 0) {
+        pdf.addPage();
+      }
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     }
     
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-  }
-  
-  // O nome do arquivo será dinâmico
-  const fileName = `${template}-${disciplina}-${serie}${turma}.pdf`;
-  pdf.save(fileName);
+    // O nome do arquivo será dinâmico
+    const fileName = `${template}-${disciplina}-${serie}${turma}.pdf`;
+    pdf.save(fileName);
 
-  setIsGeneratingPdf(false);
-};
+    setIsGeneratingPdf(false);
+  };
 
   const TemplateButton = ({ nome }: { nome: string }) => {
     const isActive = template === nome;

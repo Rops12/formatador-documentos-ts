@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import SimpleMdeEditor from "react-simplemde-editor";
+import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 
 // Importações do dnd-kit para arrastar e soltar
@@ -103,7 +103,7 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
         
         <label className="font-semibold text-sm text-gray-600">Enunciado:</label>
         <div className="editor-container mt-1">
-          <SimpleMdeEditor 
+          <SimpleMDE 
             value={dadosTemporarios.enunciado} 
             onChange={handleEnunciadoChange} 
             options={{ autofocus: true, spellChecker: false, toolbar: ["bold", "italic", "|", "unordered-list", "ordered-list"], minHeight: "100px" }} 
