@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 // Tipos e Componentes
 import { Questao } from './types';
@@ -43,6 +44,56 @@ const novaQuestaoMultiplaEscolha = (numero: number): Questao => ({
   respostaCorreta: Date.now() + numero + 1,
 });
 
+// Componente dedicado para a renderização do PDF
+const PrintLayout: React.FC<{
+  questoes: Questao[];
+  template: string;
+  disciplina: string;
+  serie: string;
+  turma: string;
+}> = ({ questoes, template, disciplina, serie, turma }) => {
+  const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);
+
+  return (
+    <div className="page-wrapper-print">
+      <div className="page">
+        <header className="border-b border-gray-300 pb-2 mb-4">
+          <div className="flex justify-between items-center">
+            {/* Se você tiver o logo, mantenha a tag img. Caso contrário, pode remover. */}
+            {/* <img src={logoColegio} alt="Logo do Colégio" className="h-20 w-auto" /> */}
+            <div className="text-right w-full">
+              <h2 className="text-xl font-bold text-blue-700">{template}</h2>
+              <p className="text-sm text-gray-600">{disciplina}</p>
+            </div>
+          </div>
+          <div className="flex justify-between text-[10px] text-gray-600 mt-2 border-t pt-2">
+            <span>Aluno(a): _________________________________________</span>
+            <span>Série: {serie}</span>
+            <span>Turma: {turma}</span>
+            <span>Data: ____/____/______</span>
+          </div>
+        </header>
+        <main className={`flex-grow ${usarDuasColunas ? 'page-content-duas-colunas' : ''}`}>
+          {questoes.map(questao => (
+            <div key={questao.id} className="mb-4 questao-preview-item">
+              <div className="prose prose-sm max-w-none">
+                <div className="font-semibold text-gray-900">Questão {questao.numero}</div>
+                <div className="enunciado"><ReactMarkdown>{questao.enunciado}</ReactMarkdown></div>
+                {questao.tipo === 'multipla-escolha' && questao.alternativas && (
+                  <ol type="a" className="list-[lower-alpha] pl-5 mt-2 space-y-1">
+                    {questao.alternativas.map(alt => <li key={alt.id}>{alt.texto}</li>)}
+                  </ol>
+                )}
+              </div>
+            </div>
+          ))}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+
 function App() {
   // --- Estados Tipados ---
   const [questoes, setQuestoes] = useState<Questao[]>([novaQuestaoMultiplaEscolha(1)]);
@@ -50,7 +101,7 @@ function App() {
   const [serie, setSerie] = useState<string>(seriesDisponiveis[0]);
   const [turma, setTurma] = useState<string>(turmasDisponiveis[0]);
   const [template, setTemplate] = useState<string>(templatesDisponiveis[0]);
-  const [idQuestaoEditando, setIdQuestaoEditando] = useState<number | null>(questoes[0].id); // Começa editando a primeira questão
+  const [idQuestaoEditando, setIdQuestaoEditando] = useState<number | null>(questoes[0].id);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
   
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
@@ -63,7 +114,7 @@ function App() {
       ? novaQuestaoMultiplaEscolha(proximoNumero) 
       : novaQuestaoDissertativa(proximoNumero);
     setQuestoes(prevQuestoes => [...prevQuestoes, novaQuestao]);
-    setIdQuestaoEditando(novaQuestao.id); // Abre a nova questão para edição
+    setIdQuestaoEditando(novaQuestao.id);
   };
 
   const handleExcluirQuestao = (id: number) => {
@@ -96,37 +147,45 @@ function App() {
     
     setIsGeneratingPdf(true);
   
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 100));
   
     const container = document.getElementById('pdf-render-container');
-    if (!container) {
+    const pageToRender = container?.querySelector('.page-wrapper-print') as HTMLElement;
+    
+    if (!pageToRender) {
       setIsGeneratingPdf(false);
       return;
     }
   
+    const canvas = await html2canvas(pageToRender, {
+      scale: 2,
+      useCORS: true,
+      scrollY: -window.scrollY,
+      windowWidth: pageToRender.scrollWidth,
+      windowHeight: pageToRender.scrollHeight,
+    });
+  
+    const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'pt', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
   
-    const pagesToRender = container.querySelectorAll('.page-wrapper-print');
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const ratio = canvasWidth / pdfWidth;
+    const imgHeight = canvasHeight / ratio;
   
-    for (let i = 0; i < pagesToRender.length; i++) {
-      const pageElement = pagesToRender[i] as HTMLElement;
-      
-      const canvas = await html2canvas(pageElement, {
-        scale: 2,
-        useCORS: true,
-        width: pageElement.offsetWidth,
-        height: pageElement.offsetHeight,
-      });
+    let heightLeft = imgHeight;
+    let position = 0;
   
-      const imgData = canvas.toDataURL('image/png');
-      
-      if (i > 0) {
-        pdf.addPage();
-      }
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+    heightLeft -= pdfHeight;
+  
+    while (heightLeft > 0) {
+      position = -pdfHeight + (imgHeight - heightLeft);
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+      heightLeft -= pdfHeight;
     }
     
     const fileName = `${template}-${disciplina}-${serie}${turma}.pdf`;
@@ -237,14 +296,13 @@ function App() {
       </div>
       
       {isGeneratingPdf && (
-        <div id="pdf-render-container" className="absolute top-0 left-0 opacity-100 bg-white z-50">
-           <Preview 
+        <div id="pdf-render-container" className="absolute top-0 left-0" style={{ zIndex: -10, opacity: 0, backgroundColor: 'white' }}>
+           <PrintLayout 
               questoes={questoes} 
               template={template}
               disciplina={disciplina}
               serie={serie}
               turma={turma}
-              isPrinting={true}
             />
         </div>
       )}
