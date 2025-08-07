@@ -8,7 +8,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 // Ícones
-import { FiEdit, FiTrash2, FiCheck, FiX, FiPlusCircle, FiMove } from 'react-icons/fi';
+
 
 // Importando nossos tipos! Esta é a base da segurança do TypeScript.
 import { Questao, Alternativa } from '../types';

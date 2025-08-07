@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Questao } from '../types';
 import { usePaginacao } from '../hooks/usePaginacao';
 import { usePageScale } from '../hooks/usePageScale';
