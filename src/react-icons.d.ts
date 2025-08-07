@@ -1,9 +1,4 @@
-// Conteúdo para src/react-icons.d.ts
-
-// Este arquivo serve como um "patch" para resolver um problema de
-// incompatibilidade de tipos entre o @types/react e o react-icons.
-// Estamos re-declarando os ícones que usamos, garantindo que o TypeScript
-// os entenda como componentes JSX válidos do tipo IconType.
+// src/react-icons.d.ts
 
 import { IconType } from 'react-icons';
 
@@ -21,4 +16,5 @@ declare module 'react-icons/fi' {
   export const FiMove: IconType;
   export const FiChevronLeft: IconType;
   export const FiChevronRight: IconType;
+  export const FiPlus: IconType; // Adicionado
 }
