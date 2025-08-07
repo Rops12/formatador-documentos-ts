@@ -49,7 +49,27 @@
 .page .prose { font-size: inherit; line-height: inherit; }
 .page .prose p, .page .prose ol, .page .prose ul { margin: 0.5em 0; }
 .page-content-duas-colunas { column-count: 2; column-gap: 1cm; }
-.questao-preview-item { break-inside: avoid; }
+
+/* AJUSTE DE QUEBRA DE PÁGINA */
+.questao-preview-item { 
+  /* A regra "break-inside: avoid;" foi removida daqui para permitir que o conteúdo flua. */
+}
+
+.questao-preview-item .enunciado p {
+  /* Evita que um parágrafo quebre deixando apenas uma linha órfã no final da página */
+  orphans: 2; 
+}
+
+.questao-preview-item ol, 
+.questao-preview-item ul {
+  /* Tenta manter a lista de alternativas junto com o enunciado, mas permite quebrar se necessário. */
+  break-before: auto;
+}
+
+.questao-preview-item li {
+  /* Impede que um item de alternativa (o texto de A, B, C...) quebre no meio. */
+  break-inside: avoid;
+}
 
 /* Wrapper para as páginas na hora de renderizar para o PDF */
 /* Ele garante que cada página tenha o tamanho exato de um A4 */
