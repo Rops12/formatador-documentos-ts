@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import ReactMarkdown from 'react-markdown'; // Import corrigido
+import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Questao } from './types';
 import QuestaoEditor from './components/QuestaoEditor';
 import Preview from './components/Preview';
@@ -10,16 +10,24 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-// --- Constantes e Funções Auxiliares (sem alterações) ---
-const disciplinasDisponiveis = ["Português", "Matemática", "Ciências", "História", "Geografia", "Inglês"];
-const seriesDisponiveis = ["6º Ano", "7º Ano", "8º Ano", "9º Ano", "1º Ano EM", "2º Ano EM", "3º Ano EM"];
-const turmasDisponiveis = ["A", "B", "C", "D", "E"];
+// --- Importações para o Painel de Configuração ---
+import { useConfiguracao } from './context/ConfiguracaoContext';
+import ConfiguracaoPainel from './components/configuracao/ConfiguracaoPainel';
+
+// --- Funções Auxiliares (sem alterações) ---
 const templatesDisponiveis = ['Prova Global', 'Microteste', 'Simuladinho', 'Simulado Enem', 'Simulado Tradicional', 'Atividade'];
 const novaQuestaoBase = (numero: number): Omit<Questao, 'tipo' | 'enunciado'> => ({ id: Date.now() + Math.random(), numero });
 const novaQuestaoDissertativa = (numero: number): Questao => ({ ...novaQuestaoBase(numero), tipo: 'dissertativa', enunciado: `Enunciado da questão dissertativa nº ${numero}.` });
 const novaQuestaoMultiplaEscolha = (numero: number): Questao => ({ ...novaQuestaoBase(numero), tipo: 'multipla-escolha', enunciado: `Enunciado da questão de múltipla escolha nº ${numero}.`, alternativas: [{ id: Date.now() + numero + 1, texto: 'Alternativa A' }, { id: Date.now() + numero + 2, texto: 'Alternativa B' }, { id: Date.now() + numero + 3, texto: 'Alternativa C' }], respostaCorreta: Date.now() + numero + 1 });
 
 function App() {
+  // --- Estado para o modo de configuração ---
+  const [isConfigMode, setIsConfigMode] = useState<boolean>(false);
+
+  // --- Consumindo dados do contexto ---
+  const { config } = useConfiguracao();
+  const { disciplinas: disciplinasDisponiveis, series: seriesDisponiveis, turmas: turmasDisponiveis } = config;
+
   const [questoes, setQuestoes] = useState<Questao[]>([novaQuestaoMultiplaEscolha(1)]);
   const [disciplina, setDisciplina] = useState<string>(disciplinasDisponiveis[0]);
   const [serie, setSerie] = useState<string>(seriesDisponiveis[0]);
@@ -29,14 +37,33 @@ function App() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
   const [paginaVisivel, setPaginaVisivel] = useState(0);
 
-  // --- Refs Corrigidas ---
+  // Efeito para atualizar o estado local se os dados do contexto mudarem
+  useEffect(() => {
+    if (!disciplinasDisponiveis.includes(disciplina)) {
+      setDisciplina(disciplinasDisponiveis[0] || '');
+    }
+  }, [disciplina, disciplinasDisponiveis]);
+
+  useEffect(() => {
+    if (!seriesDisponiveis.includes(serie)) {
+      setSerie(seriesDisponiveis[0] || '');
+    }
+  }, [serie, seriesDisponiveis]);
+
+  useEffect(() => {
+    if (!turmasDisponiveis.includes(turma)) {
+      setTurma(turmasDisponiveis[0] || '');
+    }
+  }, [turma, turmasDisponiveis]);
+
+
   const headerRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
   const { paginas, MedidorDeAltura } = usePaginacao(questoes, headerRef, footerRef);
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
-  
-  // --- Handlers (sem alterações, exceto um pequeno ajuste no handleExcluirQuestao) ---
+
+  // --- Handlers (sem alterações) ---
   const handleAdicionarQuestao = (tipo: Questao['tipo']) => {
     const proximoNumero = questoes.length + 1;
     const novaQuestao = tipo === 'multipla-escolha' ? novaQuestaoMultiplaEscolha(proximoNumero) : novaQuestaoDissertativa(proximoNumero);
@@ -47,7 +74,6 @@ function App() {
   const handleExcluirQuestao = (id: number) => {
     const novasQuestoes = questoes.filter(q => q.id !== id).map((q, i) => ({ ...q, numero: i + 1 }));
     setQuestoes(novasQuestoes);
-    // Ajusta a página visível para não ficar fora dos limites
     if (paginaVisivel >= paginas.length - 1 && paginas.length > 1) {
       setPaginaVisivel(paginas.length - 2);
     } else if (novasQuestoes.length === 0) {
@@ -118,6 +144,11 @@ function App() {
   const totalPaginas = paginas.length || 1;
   const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);
 
+  // --- Renderização Condicional do Painel ---
+  if (isConfigMode) {
+    return <ConfiguracaoPainel onVoltar={() => setIsConfigMode(false)} />;
+  }
+
   return (
     <>
       {MedidorDeAltura}
@@ -127,6 +158,15 @@ function App() {
       </div>
 
       <div className="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-8 print:hidden">
+        <header className="max-w-screen-2xl mx-auto mb-4 flex justify-end">
+            <button 
+              onClick={() => setIsConfigMode(true)}
+              className="bg-white text-gray-700 font-semibold py-2 px-4 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-100 transition-colors"
+            >
+              Configurações
+            </button>
+        </header>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-screen-2xl mx-auto w-full">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col h-fit">
             <div className="p-6 lg:p-8">

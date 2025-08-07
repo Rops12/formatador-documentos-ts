@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { Questao } from '../types';
 import { usePageScale } from '../hooks/usePageScale';
 import { PaginaLayout } from './PaginaLayout';
+import { useConfiguracao } from '../context/ConfiguracaoContext'; // Certifique-se que o caminho está correto
 
 interface PreviewProps {
   paginaQuestoes: Questao[];
@@ -29,18 +30,26 @@ function Preview({
   onProxima,
   isPrinting = false,
 }: PreviewProps) {
+  const { config } = useConfiguracao();
   const pageContainerRef = useRef<HTMLDivElement>(null);
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const scale = usePageScale(pageWrapperRef, pageContainerRef);
 
   const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);
+  
+  // Busca os estilos para o template atual ou usa um objeto vazio como fallback
+  const templateStyles = config.templateStyles[template] || {};
 
   const paginaParaRenderizar = (
     <PaginaLayout
       ref={pageWrapperRef}
       cabecalhoProps={paginaAtual === 1 ? { template, disciplina, serie, turma } : undefined}
       rodapeProps={{ paginaAtual, totalPaginas }}
-      style={isPrinting ? {} : { transform: `scale(${scale})`, transformOrigin: 'center center' }}
+      // Aplica os estilos dinâmicos vindos do contexto
+      style={{
+        ...templateStyles,
+        ...(isPrinting ? {} : { transform: `scale(${scale})`, transformOrigin: 'center center' })
+      }}
     >
       <div className={usarDuasColunas ? 'page-content-duas-colunas' : ''}>
         {paginaQuestoes.map(questao => (
