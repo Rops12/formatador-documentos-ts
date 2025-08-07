@@ -9,9 +9,6 @@ import Preview from './components/Preview';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
-// Ícones
-import { FiFileText, FiDownload, FiPlusCircle, FiType, FiBookOpen, FiLoader } from 'react-icons/fi';
-
 // Geração de PDF
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -98,35 +95,33 @@ function App() {
     if (questoes.length === 0) return;
     
     setIsGeneratingPdf(true);
-
-    // Atraso para garantir que o DOM seja atualizado com o `isPrinting`
+  
     await new Promise(resolve => setTimeout(resolve, 50));
-
+  
     const container = document.getElementById('pdf-render-container');
     if (!container) {
       setIsGeneratingPdf(false);
       return;
     }
-
+  
     const pdf = new jsPDF('p', 'pt', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-
+  
     const pagesToRender = container.querySelectorAll('.page-wrapper-print');
-
+  
     for (let i = 0; i < pagesToRender.length; i++) {
       const pageElement = pagesToRender[i] as HTMLElement;
       
       const canvas = await html2canvas(pageElement, {
-        scale: 2, // Aumenta a resolução para melhor qualidade
+        scale: 2,
         useCORS: true,
         width: pageElement.offsetWidth,
         height: pageElement.offsetHeight,
       });
-
+  
       const imgData = canvas.toDataURL('image/png');
       
-      // A primeira página não precisa de um page break antes
       if (i > 0) {
         pdf.addPage();
       }
@@ -134,10 +129,9 @@ function App() {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     }
     
-    // O nome do arquivo será dinâmico
     const fileName = `${template}-${disciplina}-${serie}${turma}.pdf`;
     pdf.save(fileName);
-
+  
     setIsGeneratingPdf(false);
   };
 
@@ -161,12 +155,12 @@ function App() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col h-fit">
             <div className="p-6 lg:p-8">
               <header className="mb-8">
-                  <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3"><FiFileText className="text-blue-600" size={32} />Construtor de Avaliações</h1>
+                  <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">Construtor de Avaliações</h1>
                   <p className="text-gray-500 mt-2">Adicione, edite e reordene as suas questões de forma modular.</p>
               </header>
 
               <div className="mb-8 p-4 bg-gray-50 rounded-lg border">
-                <h2 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2"><FiBookOpen size={20} />Informações do Cabeçalho</h2>
+                <h2 className="text-lg font-semibold text-gray-700 mb-3">Informações do Cabeçalho</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label htmlFor="disciplina" className="block text-sm font-medium text-gray-600">Disciplina</label>
@@ -190,7 +184,7 @@ function App() {
               </div>
 
               <div className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2"><FiType size={20} />Selecione o Modelo</h2>
+                <h2 className="text-lg font-semibold text-gray-700 mb-3">Selecione o Modelo</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {templatesDisponiveis.map(nome => <TemplateButton key={nome} nome={nome} />)}
                 </div>
@@ -218,14 +212,13 @@ function App() {
             <div className="mt-auto border-t p-6 space-y-4">
               <div className="flex gap-4">
                 <button onClick={() => handleAdicionarQuestao('dissertativa')} disabled={isGeneratingPdf} className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-all text-sm disabled:opacity-50">
-                  <FiPlusCircle size={16} /> Dissertativa
+                  + Dissertativa
                 </button>
                 <button onClick={() => handleAdicionarQuestao('multipla-escolha')} disabled={isGeneratingPdf} className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-all text-sm disabled:opacity-50">
-                  <FiPlusCircle size={16} /> Múltipla Escolha
+                  + Múltipla Escolha
                 </button>
               </div>
               <button onClick={handleGerarPDF} disabled={isGeneratingPdf || questoes.length === 0} className="w-full flex items-center justify-center gap-3 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-blue-700 transition-all disabled:opacity-50 disabled:bg-blue-400">
-                {isGeneratingPdf ? <FiLoader className="animate-spin" size={20} /> : <FiDownload size={20} />}
                 <span>{isGeneratingPdf ? 'Gerando PDF...' : 'Gerar PDF'}</span>
               </button>
             </div>

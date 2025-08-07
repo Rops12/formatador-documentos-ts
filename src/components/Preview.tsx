@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FiFileText, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import logoColegio from '../assets/logo.svg';
 import { Questao } from '../types';
 import { usePaginacao } from '../hooks/usePaginacao';
 import { usePageScale } from '../hooks/usePageScale';
@@ -25,9 +25,7 @@ const Cabecalho = React.forwardRef<HTMLElement, CabecalhoProps>(
   ({ template, disciplina, serie, turma }, ref) => (
     <header ref={ref} className="border-b border-gray-300 pb-2 mb-4">
       <div className="flex justify-between items-center">
-        <div className="h-20 w-20 bg-gray-200 rounded-lg flex items-center justify-center">
-          <span className="text-gray-500 text-xs">Logo</span>
-        </div>
+        <img src={logoColegio} alt="Logo do Colégio" className="h-20 w-auto" />
         <div className="text-right w-full">
           <h2 className="text-xl font-bold text-blue-700">{template}</h2>
           <p className="text-sm text-gray-600">{disciplina}</p>
@@ -42,16 +40,12 @@ const Cabecalho = React.forwardRef<HTMLElement, CabecalhoProps>(
     </header>
 ));
 
-Cabecalho.displayName = 'Cabecalho';
-
 const Rodape = React.forwardRef<HTMLElement, RodapeProps>(
   ({ paginaAtual, totalPaginas }, ref) => (
     <footer ref={ref} className="border-t border-gray-300 pt-2 mt-auto text-center text-xs text-gray-500">
       <p>Nome do Colégio | Página {paginaAtual} de {totalPaginas}</p>
     </footer>
 ));
-
-Rodape.displayName = 'Rodape';
 
 const PaginaComponent: React.FC<PaginaComponentProps> = ({ questoes, template, disciplina, serie, turma, paginaInfo }) => {
     const usarDuasColunas = ['Simuladinho', 'Simulado Enem', 'Simulado Tradicional'].includes(template);
@@ -81,7 +75,6 @@ const PaginaComponent: React.FC<PaginaComponentProps> = ({ questoes, template, d
 const EmptyState: React.FC = () => (
   <div className="page flex items-center justify-center text-center text-gray-500 bg-white shadow-lg">
     <div>
-      <FiFileText className="mx-auto text-gray-400 mb-4" size={48} />
       <h3 className="font-semibold text-gray-700">Pré-visualização do Documento</h3>
       <p className="text-sm mt-1">O conteúdo aparecerá aqui.</p>
     </div>
@@ -111,18 +104,14 @@ function Preview({ questoes, template, disciplina, serie, turma, isPrinting = fa
       <button 
         onClick={() => setPaginaVisivel(p => Math.max(0, p - 1))} 
         disabled={paginaVisivel === 0}
-        className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        <FiChevronLeft size={20} />
-      </button>
+        className="px-4 py-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >Anterior</button>
       <span className="font-semibold text-gray-700 text-sm">Página {paginaVisivel + 1} de {paginas.length || 1}</span>
       <button 
         onClick={() => setPaginaVisivel(p => Math.min(paginas.length - 1, p + 1))} 
         disabled={!paginas.length || paginaVisivel >= paginas.length - 1}
-        className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        <FiChevronRight size={20} />
-      </button>
+        className="px-4 py-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >Próxima</button>
     </div>
   );
   

@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import SimpleMDE from "react-simplemde-editor";
+import SimpleMdeEditor from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 
 // Importações do dnd-kit para arrastar e soltar
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-
-// Ícones
-import { FiEdit, FiTrash2, FiCheck, FiX, FiPlusCircle, FiMove } from 'react-icons/fi';
 
 // Importando nossos tipos! Esta é a base da segurança do TypeScript.
 import { Questao, Alternativa } from '../types';
@@ -77,7 +74,7 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
   };
   
   const handleAdicionarAlternativa = () => { 
-    const novaAlternativa: Alternativa = { id: Date.now(), texto: 'Nova Alternativa' };
+    const novaAlternativa: Alternativa = { id: Date.now() + Math.random(), texto: 'Nova Alternativa' };
     setDadosTemporarios(prev => ({
       ...prev,
       alternativas: [...(prev.alternativas || []), novaAlternativa]
@@ -103,7 +100,7 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
         
         <label className="font-semibold text-sm text-gray-600">Enunciado:</label>
         <div className="editor-container mt-1">
-          <SimpleMDE 
+          <SimpleMdeEditor 
             value={dadosTemporarios.enunciado} 
             onChange={handleEnunciadoChange} 
             options={{ autofocus: true, spellChecker: false, toolbar: ["bold", "italic", "|", "unordered-list", "ordered-list"], minHeight: "100px" }} 
@@ -130,14 +127,11 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
                     onChange={(e) => handleAlternativaChange(alt.id, e.target.value)} 
                     className="w-full p-2 border border-gray-300 rounded"
                   />
-                  <button onClick={() => handleRemoverAlternativa(alt.id)} className="p-1 text-gray-400 hover:text-red-500">
-                    <FiX size={16} />
-                  </button>
+                  <button onClick={() => handleRemoverAlternativa(alt.id)} className="p-1 text-gray-400 hover:text-red-500">X</button>
                 </div>
               ))}
             </div>
             <button onClick={handleAdicionarAlternativa} className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 mt-3">
-              <FiPlusCircle size={16} />
               Adicionar Alternativa
             </button>
           </div>
@@ -145,10 +139,10 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
 
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={handleCancelarClick} className="flex items-center gap-2 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300">
-            <FiX size={16} /> Cancelar
+            Cancelar
           </button>
           <button onClick={handleSalvarClick} className="flex items-center gap-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600">
-            <FiCheck size={16} /> Salvar
+            Salvar
           </button>
         </div>
       </div>
@@ -161,13 +155,13 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 relative group">
         <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button {...listeners} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-gray-200 rounded cursor-grab">
-            <FiMove size={16} />
+            Mover
           </button>
           <button onClick={(e) => { e.stopPropagation(); onIniciarEdicao(questao.id); }} className="p-1.5 text-gray-500 hover:text-yellow-600 hover:bg-gray-200 rounded">
-            <FiEdit size={16} />
+            Editar
           </button>
           <button onClick={(e) => { e.stopPropagation(); onExcluir(questao.id); }} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-gray-200 rounded">
-            <FiTrash2 size={16} />
+            Excluir
           </button>
         </div>
         <div onClick={() => onIniciarEdicao(questao.id)} className="cursor-pointer">
