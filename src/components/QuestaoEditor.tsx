@@ -130,7 +130,9 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
                     onChange={(e) => handleAlternativaChange(alt.id, e.target.value)} 
                     className="w-full p-2 border border-gray-300 rounded"
                   />
-                  <button onClick={() => handleRemoverAlternativa(alt.id)} className="p-1 text-gray-400 hover:text-red-500"><FiX /></button>
+                  <button onClick={() => handleRemoverAlternativa(alt.id)} className="p-1 text-gray-400 hover:text-red-500">
+                    <FiX size={16} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -143,10 +145,10 @@ function QuestaoEditor({ questao, onExcluir, idQuestaoEditando, onIniciarEdicao,
 
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={handleCancelarClick} className="flex items-center gap-2 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300">
-            <FiX /> Cancelar
+            <FiX size={16} /> Cancelar
           </button>
           <button onClick={handleSalvarClick} className="flex items-center gap-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600">
-            <FiCheck /> Salvar
+            <FiCheck size={16} /> Salvar
           </button>
         </div>
       </div>

@@ -81,7 +81,7 @@ const PaginaComponent: React.FC<PaginaComponentProps> = ({ questoes, template, d
 const EmptyState: React.FC = () => (
   <div className="page flex items-center justify-center text-center text-gray-500 bg-white shadow-lg">
     <div>
-      <FiFileText className="mx-auto text-5xl text-gray-400 mb-4" />
+      <FiFileText className="mx-auto text-gray-400 mb-4" size={48} />
       <h3 className="font-semibold text-gray-700">Pré-visualização do Documento</h3>
       <p className="text-sm mt-1">O conteúdo aparecerá aqui.</p>
     </div>
@@ -112,13 +112,17 @@ function Preview({ questoes, template, disciplina, serie, turma, isPrinting = fa
         onClick={() => setPaginaVisivel(p => Math.max(0, p - 1))} 
         disabled={paginaVisivel === 0}
         className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      ><FiChevronLeft size={20} /></button>
+      >
+        <FiChevronLeft size={20} />
+      </button>
       <span className="font-semibold text-gray-700 text-sm">Página {paginaVisivel + 1} de {paginas.length || 1}</span>
       <button 
         onClick={() => setPaginaVisivel(p => Math.min(paginas.length - 1, p + 1))} 
         disabled={!paginas.length || paginaVisivel >= paginas.length - 1}
         className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      ><FiChevronRight size={20} /></button>
+      >
+        <FiChevronRight size={20} />
+      </button>
     </div>
   );
   
