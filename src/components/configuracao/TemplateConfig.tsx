@@ -23,7 +23,7 @@ function TemplateConfig() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
       <h2 className="text-xl font-semibold mb-4">Templates de Documento</h2>
-      <p className="text-sm text-gray-500 mb-6">Ajuste as margens, fontes e outros estilos para cada modelo.</p>
+      <p className="text-sm text-gray-500 mb-6">Ajuste as margens e tamanho da fonte para cada modelo.</p>
 
       <div className="mb-4">
         <label htmlFor="template-select" className="block text-sm font-medium text-gray-700 mb-1">
@@ -39,7 +39,7 @@ function TemplateConfig() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="padding" className="block text-sm font-medium text-gray-600">Margens (padding)</label>
           <input
@@ -60,17 +60,6 @@ function TemplateConfig() {
             onChange={(e) => handleStyleChange('fontSize', e.target.value)}
             className="mt-1 w-full p-2 border border-gray-300 rounded-md"
             placeholder="ex: 10pt"
-          />
-        </div>
-        <div>
-          <label htmlFor="fontFamily" className="block text-sm font-medium text-gray-600">Família da Fonte</label>
-          <input
-            type="text"
-            id="fontFamily"
-            value={currentStyles.fontFamily}
-            onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
-            className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-            placeholder="ex: Arial, sans-serif"
           />
         </div>
       </div>

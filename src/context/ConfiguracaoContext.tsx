@@ -1,13 +1,9 @@
-// src/context/ConfiguracaoContext.tsx (modificado)
-
 import React, { createContext, useState, ReactNode, useContext } from 'react';
 
-// 1. Detalhar mais a interface de estilos
+// Interface de estilos (sem a família da fonte)
 interface TemplateStyles {
   padding: string;
   fontSize: string;
-  fontFamily: string;
-  // Podemos adicionar mais no futuro: headerHeight, footerHeight, etc.
 }
 
 interface Configuracoes {
@@ -24,23 +20,22 @@ interface ConfiguracaoContextType {
   updateDisciplinas: (disciplinas: string[]) => void;
   updateSeries: (series: string[]) => void;
   updateTurmas: (turmas: string[]) => void;
-  // 2. Adicionar função para atualizar estilos
   updateTemplateStyle: (templateName: string, newStyles: TemplateStyles) => void;
 }
 
+// Valores iniciais (sem a família da fonte)
 const initialState: Configuracoes = {
-  disciplinas: ["Português", "Matemática", "Ciências", "História", "Geografia", "Inglês"],
+  disciplinas: ["Português", "Matemática", "Ciências", "História", "Geografia", "Inglês", "Física", "Química", "Biologia", "Filosofia", "Sociologia"],
   series: ["6º Ano", "7º Ano", "8º Ano", "9º Ano", "1º Ano EM", "2º Ano EM", "3º Ano EM"],
   turmas: ["A", "B", "C", "D", "E"],
   logoUrl: null,
-  // 3. Adicionar valores iniciais para os novos campos
   templateStyles: {
-    'Prova Global': { padding: '1.5cm', fontSize: '10pt', fontFamily: 'Arial, sans-serif' },
-    'Microteste': { padding: '1.2cm', fontSize: '11pt', fontFamily: 'Arial, sans-serif' },
-    'Simuladinho': { padding: '1cm', fontSize: '9pt', fontFamily: 'Times New Roman, serif' },
-    'Simulado Enem': { padding: '1cm', fontSize: '9pt', fontFamily: 'Times New Roman, serif' },
-    'Simulado Tradicional': { padding: '1cm', fontSize: '9pt', fontFamily: 'Times New Roman, serif' },
-    'Atividade': { padding: '1.5cm', fontSize: '10pt', fontFamily: 'Arial, sans-serif' },
+    'Prova Global': { padding: '1.5cm', fontSize: '10pt' },
+    'Microteste': { padding: '1.2cm', fontSize: '11pt' },
+    'Simuladinho': { padding: '1cm', fontSize: '9pt' },
+    'Simulado Enem': { padding: '1cm', fontSize: '9pt' },
+    'Simulado Tradicional': { padding: '1cm', fontSize: '9pt' },
+    'Atividade': { padding: '1.5cm', fontSize: '10pt' },
   }
 };
 
@@ -53,7 +48,6 @@ export const ConfiguracaoProvider = ({ children }: { children: ReactNode }) => {
   const updateSeries = (novasSeries: string[]) => setConfig(prev => ({ ...prev, series: novasSeries }));
   const updateTurmas = (novasTurmas: string[]) => setConfig(prev => ({ ...prev, turmas: novasTurmas }));
   
-  // 4. Implementar a função de atualização de estilo
   const updateTemplateStyle = (templateName: string, newStyles: TemplateStyles) => {
     setConfig(prev => ({
       ...prev,

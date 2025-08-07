@@ -1,3 +1,10 @@
+// Define a estrutura de uma afirmativa para questões de Verdadeiro ou Falso
+export interface Afirmativa {
+  id: number;
+  texto: string;
+  correta: boolean;
+}
+
 // Define a estrutura de uma única alternativa em uma questão de múltipla escolha
 export interface Alternativa {
   id: number;
@@ -8,8 +15,17 @@ export interface Alternativa {
 export interface Questao {
   id: number;
   numero: number;
-  tipo: 'dissertativa' | 'multipla-escolha'; // Usamos um "union type" para tipos exatos
+  // Adicionamos o novo tipo 'verdadeiro-falso'
+  tipo: 'dissertativa' | 'multipla-escolha' | 'verdadeiro-falso';
   enunciado: string;
-  alternativas?: Alternativa[]; // A '?' indica que esta propriedade é opcional
-  respostaCorreta?: number;     // Também opcional
+  
+  // Propriedades opcionais para funcionalidades específicas
+  imagemUrl?: string | null;      // Para adicionar imagem à questão
+  disciplina?: string;            // Para agrupar questões em simulados
+
+  // Propriedades específicas de cada tipo de questão
+  alternativas?: Alternativa[];   // Apenas para 'multipla-escolha'
+  respostaCorreta?: number;       // Apenas para 'multipla-escolha'
+  linhasResposta?: number;        // Apenas para 'dissertativa'
+  afirmativas?: Afirmativa[];     // Apenas para 'verdadeiro-falso'
 }

@@ -1,8 +1,8 @@
-// src/components/configuracao/MetadadosConfig.tsx (modificado)
+// src/components/configuracao/MetadadosConfig.tsx
 
 import React from 'react';
 import { useConfiguracao } from '../../context/ConfiguracaoContext';
-import EditableList from './EditableList'; // Importe o novo componente
+import EditableList from './EditableList'; // Ele também vai precisar do EditableList
 
 function MetadadosConfig() {
   const { config, updateDisciplinas, updateSeries, updateTurmas } = useConfiguracao();

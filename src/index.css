@@ -1,7 +1,16 @@
 /* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Define a fonte padrão para todo o corpo do documento */
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 /* Estilos do Editor (sem alterações) */
 .editor-container .EasyMDEContainer { border: 1px solid #d1d5db; border-radius: 0.5rem; }
@@ -42,15 +51,23 @@
   display: flex; /* ESSENCIAL */
   flex-direction: column; /* ESSENCIAL */
   overflow: hidden; /* Evita que conteúdo estoure visualmente */
+  font-family: 'Inter', sans-serif; /* Garante a fonte no PDF */
 }
 
-.page .prose { font-size: inherit; line-height: inherit; }
+.page .prose { font-size: inherit; line-height: inherit; font-family: 'Inter', sans-serif; }
 .page .prose p, .page .prose ol, .page .prose ul { margin: 0.5em 0; }
 .page-content-duas-colunas { column-count: 2; column-gap: 1cm; flex-grow: 1; }
 
 /* Adiciona espaçamento entre as questões */
 .questao-preview-item + .questao-preview-item {
   padding-top: 1rem;
+}
+
+/* Estilos para as linhas de resposta dissertativa */
+.linhas-resposta {
+  border-bottom: 1px solid #9ca3af;
+  height: 1.5em; /* Ajuste a altura da linha conforme necessário */
+  box-sizing: border-box;
 }
 
 /* Wrapper para as páginas na hora de renderizar para o PDF */
@@ -63,4 +80,13 @@
 
 .page-wrapper-print .page {
   box-shadow: none;
+}
+
+/* Estilos para Capa e Fundo de Simulado */
+.page-capa, .page-fundo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
